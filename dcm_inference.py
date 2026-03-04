@@ -12,14 +12,16 @@ Minimal (masks generated automatically):
 
     uv run dcm_inference.py \\
         data.monai_dict_dicom=/path/to/dicom_manifest.json \\
-        log.ckpt_loc=/path/to/checkpoints/best.pt
+        testing.use_checkpoint=best.pt \\
+        log.ckpt_loc=/path/to/checkpoints
 
 With pre-computed masks in a specific directory:
 
     uv run dcm_inference.py \\
         data.monai_dict_dicom=/path/to/dicom_manifest.json \\
         testing.mask_dir=/path/to/masks \\
-        log.ckpt_loc=/path/to/checkpoints/best.pt
+        testing.use_checkpoint=best.pt \\
+        log.ckpt_loc=/path/to/checkpoints
 
 Input JSON format
 -----------------
@@ -259,7 +261,7 @@ def _build_model(cfg: DictConfig) -> Lungevity:
     )
     model = model.to(device)
 
-    ckpt_path = Path(cfg.log.ckpt_loc)
+    ckpt_path = Path(cfg.log.ckpt_loc) / cfg.testing.use_checkpoint
     if not ckpt_path.exists():
         raise FileNotFoundError(f"Checkpoint not found: {ckpt_path}")
     checkpoint = torch.load(str(ckpt_path), weights_only=False, map_location=device)
@@ -355,7 +357,7 @@ def _write_results(results: List[dict], cfg: DictConfig) -> None:
     y_mask_keys = [f"y_mask_yr{y+1}" for y in range(max_followup)]
 
     # --- CSV ---
-    csv_path = out_dir / "results.csv"
+    csv_path = out_dir / f"{cfg.testing.use_checkpoint}_results.csv"
     fieldnames = ["pid", "series", "label", "time_at_event"] + y_seq_keys + y_mask_keys + year_keys
     with open(csv_path, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -378,7 +380,7 @@ def _write_results(results: List[dict], cfg: DictConfig) -> None:
     print(f"Saved {csv_path}")
 
     # --- JSON ---
-    json_path = out_dir / "results.json"
+    json_path = out_dir / f"{cfg.testing.use_checkpoint}_results.json"
     json_path.write_text(json.dumps(results, indent=2))
     print(f"Saved {json_path}")
 

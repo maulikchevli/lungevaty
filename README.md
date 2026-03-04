@@ -26,3 +26,7 @@ Please refer to [dcm_inference.py](./dcm_inference.py) and [sample_dicom_manifes
 
 ## Inference script
 [dcm_inference.py](./dcm_inference.py) takes care of all the preprocessing from raw dicom file and can be run with the above json schema without any segmentation masks.
+
+
+## Results
+Outputs of the scripts will be written under `./outputs/`.
