@@ -1,0 +1,57 @@
+# ============================================================
+# dcm_inference.yaml  —  config for dcm_inference.py
+#
+# All values can be overridden on the command line, e.g.:
+#   uv run dcm_inference.py data.monai_dict_dicom=/my/data.json
+# ============================================================
+
+data:
+    # REQUIRED: path to JSON manifest with DICOM entries (image, mask, pid, ...)
+    monai_dict_dicom: ''
+    max_followup: 6
+    img_size: [160, 240, 128]
+
+training:
+    use_amp: True
+    dtype: bfloat16
+    batch_size: 1
+    test_num_workers: 0
+    prefetch_factor: 2
+
+preprocess:
+    # Orientation axes code (e.g. PLS, RAS, LPS)
+    axcodes: "PLS"
+    # Resampling voxel spacing [x, y, z] in mm
+    pixdim: [1.4, 1.4, 2.5]
+    # HU window for intensity scaling
+    hu_min: -1350
+    hu_max: 150
+    # Foreground crop margin [x, y, z] in voxels
+    crop_margin: [2, 2, 1]
+
+testing:
+    # Checkpoint filename inside the run directory (e.g. best.pt or last.pt)
+    use_checkpoint: 'best.pt'
+    # Directory where on-the-fly lung masks are cached (created if missing)
+    mask_dir: "./outputs/dcm_inference/masks"
+    # Directory where results.csv and results.json are written
+    output_dir: "./outputs/dcm_inference"
+
+log:
+    # REQUIRED: root directory containing checkpoint run folders
+    ckpt_loc: ''
+    # REQUIRED: name of the run folder inside ckpt_loc
+    use_checkpoint: ''
+
+model:
+    transformer: 'eva'
+    patch_size: [8, 8, 8]
+    enc_dim: 792
+    enc_heads: 12
+    enc_depth: 12
+    dropout_rate: 0.1
+    num_reg_tokens: 0
+    use_cls: True
+    use_mean_token: True
+    guided_attention_heads: 4
+    fusion_layer: False

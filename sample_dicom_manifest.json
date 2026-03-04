@@ -1,0 +1,11 @@
+[
+    {
+        "image": "data/patient_001/series_01/series_01.dcm",
+        "pid": "patient_001",
+        "series": "series_01",
+        "y": 1,
+        "time_at_event": 2,
+        "y_seq": [0, 0, 1, 1, 1],
+        "y_mask": [1, 1, 1, 1, 0] 
+    }
+]

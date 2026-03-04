@@ -1,0 +1,227 @@
+# defaults:
+#   - base_config
+#   - _self_
+
+wandb:
+    dry_run: True
+    project_name: "survival-torch"
+    task: "mae"
+    entity: "mri-ai-lab"
+
+data:
+    dataset_file: "/dss/dssmcmlfs01/pn73mu/pn73mu-dss-0000/datasets/big_nodule_nlst/dataset_jsons/nlst_25_metadata.json"
+    dataset_file_100: "/dss/dssmcmlfs01/pn73mu/pn73mu-dss-0000/datasets/big_nodule_nlst/dataset_jsons/nlst_25_metadata.json"
+    slice_thickness_threshold: 2.5
+    max_followup: 6
+    num_classes: 1
+    assign_splits: True
+    use_thinnest_cut: True
+    corrupted_paths: "./files/corrupted_img_paths.pkl"
+    google_splits_filename: "./files/Shetty_et_al(Google)_data_splits.p"
+    data_root: "/pool/data/lung/NLST/npy"
+    monai_dict_train: "/tank-1/data/NLST/json/train_dec9.json"
+    monai_dict_dev: "/tank-1/data/NLST/json/dev_dec9.json"
+    monai_dict_test: "/tank-1/data/NLST/json/test_dec9.json"
+    max_train_len: 24000
+    img_size: [160, 240, 128]
+
+
+training:
+    freeze_encoder_epochs: 2
+    use_amp: True
+    dtype: bfloat16
+    mask_ratio: 0.5
+    seed: 0
+    num_workers: 0
+    dev_num_workers: 0
+    test_num_workers: 1
+    prefetch_factor: null
+    dev_prefetch_factor: null
+    shuffle: False
+    epochs: 10
+    batch_size: 2
+    accumulation_steps: 8
+    to_checkpoint: True
+    underrepresented_weight: 14
+    sampler: "weighted"
+    minority_samples_per_batch: 1
+    freeze_encoder: True
+    freeze_mha: False
+    resume: False
+
+optimizer:
+    lr_scheduler: constant
+    peak_lr: 0.00001
+    div_factor: 100
+    final_div_factor: 1000
+    pct_start: 0.1
+    weight_decay: 0.000001
+
+attention:
+    heads: 4
+    use_cls: True
+    use_mean_token: False
+
+loss:
+    sw: 10
+    aw: 1
+    loss_strategy: [1, 1] # (expert annotations, manual mask)
+
+log:
+    ckpt_loc: "/tank-1/data/checkpoints/survival"
+    ckpt_load_loc: "/tank-1/data/checkpoints/mae"
+    mae_ckpt_load: 'vit-last'
+    mae_use_checkpoint: 'smooth-field-480-epoch-999.ckpt'
+    ckpt_best: 'vit'
+    ckpt_last: 'vit-last'
+    ckpt_load: 'vit'
+    use_checkpoint: "northern-elevator-152"
+    checkpoint_at_epoch: 1
+    log_at_these_steps: 2000
+    log_scans_at_these_epochs: 5
+    num_predictions: 20
+
+model:
+    transformer: 'eva'
+    patch_size: [16, 16, 16]
+    enc_dim: 792
+    dec_dim: 396
+    dropout_rate: 0.1
+    enc_heads: 12
+    enc_depth: 12
+    dec_heads: 6
+    dec_depth: 4
+    in_chans: 1
+    rng: 24
+    num_reg_tokens: 0 # We do not use EVA's register tokens, only our CLS token
+    use_cls: True
+    use_mean_token: False
+    guided_attention_heads: 4
+    fusion_layer: False
+    drop_path_rate: 0.1
+
+
+# model:
+#     patch_size: 16
+#     enc_dim: 768
+#     dec_dim: 384
+#     dropout_rate: 0.1
+#     enc_heads: 12
+#     enc_depth: 12
+#     dec_heads: 6
+#     dec_depth: 4
+#     in_chans: 1
+#     rng: 24
+
+transform:
+    train_tf:
+        LoadImaged:
+            keys: ['image', 'mask', 'annotation']
+            allow_missing_keys: True
+        EnsureChannelFirstd:
+            keys: ['image', 'mask', 'annotation']
+            allow_missing_keys: True
+        Resized:
+            keys: ['image', 'mask', 'annotation']
+            mode: ["trilinear", "nearest", "nearest"]
+            spatial_size: [160, 240, 128]
+            allow_missing_keys: True
+        ToDeviced:
+            keys: ['image', 'mask', 'annotation']
+            allow_missing_keys: True 
+            device: "cuda"
+        RandFlipd_1:
+            keys: ['image', 'mask', 'annotation']
+            allow_missing_keys: True
+            prob: 0.5
+            spatial_axis: 0
+        RandFlipd_2:
+            keys: ['image', 'mask', 'annotation']
+            allow_missing_keys: True
+            prob: 0.5
+            spatial_axis: 1
+        RandFlipd_3:
+            keys: ['image', 'mask', 'annotation']
+            allow_missing_keys: True
+            prob: 0.5
+            spatial_axis: 2
+        RandRotated:
+            keys: ['image', 'mask', 'annotation']
+            allow_missing_keys: True
+            prob: 0.5
+            range_x: 0.2
+            range_y: 0.2
+            range_z: 0.2
+            mode: ['bilinear', 'nearest', 'nearest']
+        RandHistogramShiftd:
+            keys: ['image']
+            prob: 0.75
+            num_control_points: [5,8]
+        RandGaussianSharpend:
+            keys: ['image']
+            sigma1_x: [0.1,0.5]
+            sigma1_y: [0.1,0.5]
+            sigma1_z: [0.1,0.5]
+            sigma2_x: 0.3
+            sigma2_y: 0.3
+            sigma2_z: 0.3
+            prob: 0.75
+            alpha: [1.5, 10]
+        RandGaussianNoised:
+            keys: ['image']
+            prob: 0.5
+            mean: 0
+            std: 0.25
+        Permuted_our:
+            keys: ['image', 'annotation', 'mask']
+        Lateralityd_our:
+            keys: ['annotation']
+            patch_size: [16, 16, 16]
+        ToTensord:
+            keys: ['image', 'annotation', 'y_mask', 'y_seq']
+            allow_missing_keys: True
+            track_meta: False
+            device: "cuda"
+            dtype: bfloat16
+
+    dev_tf:
+        LoadImaged:
+            keys: ['image', 'mask', 'annotation']
+            allow_missing_keys: True
+        EnsureChannelFirstd:
+            keys: ['image', 'mask', 'annotation']
+            allow_missing_keys: True
+        Resized:
+            keys: ['image', 'mask', 'annotation']
+            mode: ["trilinear", "nearest", "nearest"]
+            spatial_size: [160, 240, 128]
+            allow_missing_keys: True
+        Permuted_our:
+            keys: ['image', 'annotation', 'mask']
+        ToTensord:
+            keys: ['image', 'annotation', 'y_mask', 'y_seq']
+            allow_missing_keys: True
+            track_meta: False
+            device: "cuda"
+            dtype: bfloat16
+
+    test_tf:
+        LoadImaged:
+            keys: ['image', 'mask', 'annotation']
+            allow_missing_keys: True
+        EnsureChannelFirstd:
+            keys: ['image', 'mask', 'annotation']
+            allow_missing_keys: True
+        Resized:
+            keys: ['image', 'mask', 'annotation']
+            mode: ["trilinear", "nearest", "nearest"]
+            spatial_size: [160, 240, 128]
+            allow_missing_keys: True
+        Permuted_our:
+            keys: ['image', 'annotation', 'mask']
+        ToTensord:
+            keys: ['image', 'annotation', 'y_mask', 'y_seq']
+            allow_missing_keys: True
+            track_meta: False
+            device: "cuda"
+            dtype: bfloat16
