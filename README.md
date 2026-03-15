@@ -12,7 +12,7 @@ Prepare a json file with the following structure:
 ```json
 [
     {
-        "image": "data/patient_001/series_01/series_01.dcm",
+        "image": "data/patient_001/study_001/series_01",
         "pid": "patient_001",
         "series": "series_01",
         "y": 1,
