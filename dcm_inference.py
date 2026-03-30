@@ -128,6 +128,11 @@ def _ensure_masks(entries: List[dict], cfg: DictConfig) -> List[dict]:
         # --- priority 1: explicit mask in the entry ---
         existing_mask = entry.get("mask", "")
         if existing_mask and Path(existing_mask).exists():
+            mask_sitk = sitk.ReadImage(existing_mask)
+            mask_arr = sitk.GetArrayFromImage(mask_sitk)
+            if mask_arr.sum() == 0:
+                print(f"  [mask] Empty mask (no lung detected), skipping idx={idx}: {existing_mask}")
+                continue
             updated.append(dict(entry))
             continue
 
@@ -137,6 +142,13 @@ def _ensure_masks(entries: List[dict], cfg: DictConfig) -> List[dict]:
         safe_name = _sanitize_for_filename(str(series_uid))
         mask_path = mask_root / pid / f"{safe_name}.nii.gz"
         mask_path.parent.mkdir(parents=True, exist_ok=True)
+
+        if mask_path.exists():
+            mask_sitk_cached = sitk.ReadImage(str(mask_path))
+            mask_arr_cached = sitk.GetArrayFromImage(mask_sitk_cached)
+            if mask_arr_cached.sum() == 0:
+                print(f"  [mask] Cached mask is empty (no lung detected), skipping idx={idx} ({series_uid})")
+                continue
 
         if not mask_path.exists():
             if inferer is None:
@@ -153,6 +165,10 @@ def _ensure_masks(entries: List[dict], cfg: DictConfig) -> List[dict]:
 
                 segmentation = inferer.apply(sitk_image)          # (Z, H, W)  values 0/1/2
                 binary_mask = (segmentation > 0).astype(np.uint8) # binarise left+right lung
+
+                if binary_mask.sum() == 0:
+                    print(f"  [mask] Empty mask (no lung detected), skipping idx={idx} ({series_uid})")
+                    continue
 
                 mask_sitk = sitk.GetImageFromArray(binary_mask)
                 mask_sitk.CopyInformation(sitk_image)
