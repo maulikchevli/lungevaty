@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LungEvaty — Lung Cancer Risk Prediction from LDCT</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fafaf8;
+  --fg: #1a1a1a;
+  --fg-muted: #555;
+  --accent: #1a5e9a;
+  --accent-light: #e8f1f8;
+  --border: #ddd;
+  --card-bg: #fff;
+  --serif: 'Source Serif 4', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --max-w: 860px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+.hero {
+  padding: 80px 24px 48px;
+  text-align: center;
+  background: linear-gradient(180deg, var(--accent-light) 0%, var(--bg) 100%);
+}
+
+.hero h1 {
+  font-family: var(--serif);
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  max-width: 780px;
+  margin: 0 auto 8px;
+}
+
+.hero h1 span {
+  color: var(--accent);
+}
+
+.venue {
+  font-size: 0.95rem;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 24px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.authors {
+  font-size: 1rem;
+  color: var(--fg-muted);
+  max-width: 700px;
+  margin: 0 auto 12px;
+  line-height: 1.8;
+}
+
+.authors strong { color: var(--fg); font-weight: 600; }
+
+.affiliations {
+  font-size: 0.82rem;
+  color: var(--fg-muted);
+  max-width: 650px;
+  margin: 0 auto 32px;
+  line-height: 1.6;
+}
+
+.links {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.links a.primary {
+  background: var(--accent);
+  color: #fff;
+}
+.links a.primary:hover { background: #144d80; }
+
+.links a.secondary {
+  background: var(--card-bg);
+  color: var(--fg);
+  border: 1.5px solid var(--border);
+}
+.links a.secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+.links a svg { width: 18px; height: 18px; }
+
+main {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+section { margin-top: 56px; }
+
+section h2 {
+  font-family: var(--serif);
+  font-size: 1.55rem;
+  font-weight: 600;
+  margin-bottom: 18px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--accent);
+  display: inline-block;
+}
+
+.abstract-text {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  color: #333;
+  line-height: 1.85;
+  text-align: justify;
+}
+
+.figure-container {
+  margin: 36px 0;
+  text-align: center;
+}
+
+.figure-container img {
+  max-width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+}
+
+.figure-caption {
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+  margin-top: 12px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+.highlights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.highlight-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 22px;
+  transition: box-shadow 0.2s;
+}
+.highlight-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+
+.highlight-card .icon {
+  font-size: 1.6rem;
+  margin-bottom: 8px;
+}
+
+.highlight-card h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.highlight-card p {
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+  line-height: 1.55;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  margin-top: 16px;
+  background: var(--card-bg);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+}
+
+table thead {
+  background: var(--accent);
+  color: #fff;
+}
+
+table th {
+  padding: 10px 10px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+}
+
+table td {
+  padding: 8px 10px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+
+table tbody tr:last-child td { border-bottom: none; }
+
+.model-name { text-align: left !important; font-weight: 600; }
+
+.split-header td {
+  background: var(--accent-light);
+  font-weight: 700;
+  color: var(--accent);
+  text-align: center !important;
+  padding: 6px;
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+}
+
+.ours { background: #f0f7ed !important; font-weight: 600; }
+.best { font-weight: 800; color: var(--accent); }
+
+.table-caption {
+  font-size: 0.83rem;
+  color: var(--fg-muted);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.bibtex-block {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  border-radius: 10px;
+  padding: 24px;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  line-height: 1.7;
+  overflow-x: auto;
+  position: relative;
+  margin-top: 16px;
+}
+
+.bibtex-block .copy-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255,255,255,0.1);
+  color: #cdd6f4;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-family: var(--sans);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.bibtex-block .copy-btn:hover { background: rgba(255,255,255,0.2); }
+
+footer {
+  text-align: center;
+  padding: 32px 24px;
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 600px) {
+  .hero { padding: 48px 16px 32px; }
+  main { padding: 0 16px 48px; }
+  section { margin-top: 40px; }
+  .highlights { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <p class="venue">ISBI 2026</p>
+  <h1><span>LungEvaty</span>: A Scalable, Open-Source Transformer-Based Deep Learning Model for Lung Cancer Risk Prediction in LDCT Screening</h1>
+  <p class="authors">
+    <strong>Johannes Brandt</strong>*,
+    <strong>Maulik Chevli</strong>*,
+    Rickmer Braren,
+    Georgios Kaissis,
+    <strong>Philip Müller</strong><sup>†</sup>,
+    <strong>Daniel Rueckert</strong><sup>†</sup>
+  </p>
+  <p class="affiliations">
+    Technical University of Munich (TUM) &nbsp;·&nbsp; Imperial College London &nbsp;·&nbsp; MCML<br>
+    <span style="font-size:0.75rem;">* Shared first authorship &nbsp; † Equal supervision</span>
+  </p>
+  <div class="links">
+    <a class="primary" href="https://arxiv.org/abs/2511.20116" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Paper (arXiv)
+    </a>
+    <a class="secondary" href="https://github.com/maulikchevli/lungevaty" target="_blank">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      Code
+    </a>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <h2>Abstract</h2>
+  <p class="abstract-text">
+    Lung cancer risk estimation is gaining increasing importance as more countries introduce population-wide screening programs using low-dose CT (LDCT). As imaging volumes grow, scalable methods that can process entire lung volumes efficiently are essential. Existing approaches either over-rely on pixel-level annotations, limiting scalability, or analyze the lung in fragments, weakening performance. We present <strong>LungEvaty</strong>, a fully Transformer-based framework for predicting 1–6 year lung cancer risk from a single LDCT scan. The model operates on whole-lung inputs, learning directly from large-scale screening data to capture comprehensive anatomical and pathological cues relevant for malignancy risk. Using only imaging data and no region supervision, LungEvaty matches state-of-the-art performance, refinable by our optional <em>Anatomically Informed Attention Guidance</em> (AIAG) loss, which encourages anatomically focused attention. In total, LungEvaty was trained on more than 90,000 CT scans, including over 28,000 for fine-tuning and 6,000 for evaluation. Our framework offers a simple, data-efficient, and fully open-source solution that provides an extensible foundation for future research in longitudinal and multimodal lung cancer risk prediction.
+  </p>
+</section>
+
+<section>
+  <h2>Key Contributions</h2>
+  <div class="highlights">
+    <div class="highlight-card">
+      <div class="icon">🏗️</div>
+      <h3>Whole-Lung Transformer</h3>
+      <p>Fully Transformer-based architecture processing entire lung volumes — no fragmentation, full anatomical context.</p>
+    </div>
+    <div class="highlight-card">
+      <div class="icon">🎯</div>
+      <h3>AIAG Loss</h3>
+      <p>Optional Anatomically Informed Attention Guidance — benefits from expert annotations when available, strong without them.</p>
+    </div>
+    <div class="highlight-card">
+      <div class="icon">📈</div>
+      <h3>State-of-the-Art</h3>
+      <p>Matches or exceeds SOTA with single modality, single task, and 60% of prior pretraining data volume.</p>
+    </div>
+    <div class="highlight-card">
+      <div class="icon">🔓</div>
+      <h3>Fully Open Source</h3>
+      <p>Code and weights publicly available — enabling reproducible research and community-driven extensions.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Architecture</h2>
+  <div class="figure-container">
+    <img src="arch.png" alt="LungEvaty Architecture">
+    <p class="figure-caption">
+      <strong>LungEvaty architecture.</strong> A Primus (EVA-02) Transformer encoder, pretrained via masked autoencoding on 91K NLST scans, processes the whole lung. A CLS token captures global context while a learnable MHA query token attends to local features. Both are concatenated and fed into a Cumulative Hazard Layer for 1–6 year risk prediction. The optional AIAG loss aligns attention weights with expert annotations when available.
+    </p>
+  </div>
+</section>
+
+<section>
+  <h2>Results</h2>
+
+  <p class="table-caption"><strong>ROC-AUC</strong> (Years 1–6) and <strong>C-Index</strong> on the Sybil and M3FM test splits. Bold = best, underline = second best.</p>
+  <div style="overflow-x:auto;">
+  <table>
+    <thead>
+      <tr><th class="model-name">Model</th><th>Training</th><th>Y1</th><th>Y2</th><th>Y3</th><th>Y4</th><th>Y5</th><th>Y6</th><th>C-Idx</th></tr>
+    </thead>
+    <tbody>
+      <tr class="split-header"><td colspan="9">Sybil Test Split</td></tr>
+      <tr><td class="model-name">Sybil</td><td>SM-ST</td><td>0.927</td><td>0.844</td><td>0.792</td><td>0.769</td><td>0.755</td><td>0.750</td><td>0.749</td></tr>
+      <tr><td class="model-name">M3FM</td><td>MM-MT</td><td>0.892</td><td>0.845</td><td>0.803</td><td>0.782</td><td>0.770</td><td>0.769</td><td>0.762</td></tr>
+      <tr class="ours"><td class="model-name">LungEvaty (w/ AIAG)</td><td>SM-ST</td><td class="best">0.928</td><td class="best">0.893</td><td class="best">0.848</td><td>0.819</td><td>0.808</td><td>0.805</td><td>0.800</td></tr>
+      <tr class="ours"><td class="model-name">LungEvaty (no annot.)</td><td>SM-ST</td><td>0.923</td><td>0.887</td><td>0.844</td><td class="best">0.820</td><td class="best">0.809</td><td class="best">0.809</td><td class="best">0.802</td></tr>
+
+      <tr class="split-header"><td colspan="9">M3FM Test Split</td></tr>
+      <tr><td class="model-name">Sybil</td><td>SM-ST</td><td>0.943</td><td>0.880</td><td>0.847</td><td>0.850</td><td>0.849</td><td>0.847</td><td>0.844</td></tr>
+      <tr><td class="model-name">M3FM Huge</td><td>MM-MT</td><td>0.940</td><td>0.888</td><td>0.860</td><td>0.860</td><td>0.839</td><td>0.823</td><td>–</td></tr>
+      <tr class="ours"><td class="model-name">LungEvaty (w/ AIAG)</td><td>SM-ST</td><td class="best">0.947</td><td class="best">0.912</td><td class="best">0.898</td><td class="best">0.884</td><td>0.877</td><td>0.876</td><td>0.872</td></tr>
+      <tr class="ours"><td class="model-name">LungEvaty (no annot.)</td><td>SM-ST</td><td>0.939</td><td>0.901</td><td>0.891</td><td>0.883</td><td class="best">0.878</td><td class="best">0.878</td><td class="best">0.873</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div style="margin-top:32px;">
+  <p class="table-caption"><strong>PR-AUC</strong> on Sybil split — a more clinically relevant metric for imbalanced screening data.</p>
+  <div style="overflow-x:auto;">
+  <table>
+    <thead>
+      <tr><th class="model-name">Model</th><th>Y1</th><th>Y2</th><th>Y3</th><th>Y4</th><th>Y5</th><th>Y6</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="model-name">Sybil</td><td>0.357</td><td>0.285</td><td>0.251</td><td>0.235</td><td>0.244</td><td>0.292</td></tr>
+      <tr><td class="model-name">M3FM</td><td>0.212</td><td>0.179</td><td>0.162</td><td>0.151</td><td>0.160</td><td>0.220</td></tr>
+      <tr class="ours"><td class="model-name">LungEvaty</td><td class="best">0.444</td><td class="best">0.364</td><td class="best">0.323</td><td class="best">0.297</td><td class="best">0.299</td><td class="best">0.361</td></tr>
+    </tbody>
+  </table>
+  </div>
+  </div>
+</section>
+
+<section>
+  <h2>Citation</h2>
+  <div class="bibtex-block">
+    <button class="copy-btn" onclick="navigator.clipboard.writeText(this.nextElementSibling.textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',2000)})">Copy</button>
+<pre>@article{brandt2025lungevaty,
+  title={LungEvaty: A Scalable, Open-Source Transformer-Based
+         Deep Learning Model for Lung Cancer Risk Prediction
+         in LDCT Screening},
+  author={Brandt, Johannes and Chevli, Maulik and Braren, Rickmer
+          and Kaissis, Georgios and M{\"u}ller, Philip
+          and Rueckert, Daniel},
+  journal={arXiv preprint arXiv:2511.20116},
+  year={2025}
+}</pre>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  LungEvaty &middot; TUM AI in Healthcare &middot; 2025
+</footer>
+
+</body>
+</html>
