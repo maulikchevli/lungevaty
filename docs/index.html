@@ -371,7 +371,7 @@ footer {
   <div class="figure-container">
     <img src="arch.png" alt="LungEvaty Architecture">
     <p class="figure-caption">
-      <strong>LungEvaty architecture.</strong> A Primus (EVA-02) Transformer encoder, pretrained via masked autoencoding on 91K NLST scans, processes the whole lung. A CLS token captures global context while a learnable MHA query token attends to local features. Both are concatenated and fed into a Cumulative Hazard Layer for 1–6 year risk prediction. The optional AIAG loss aligns attention weights with expert annotations when available.
+      <strong>LungEvaty* architecture.</strong> A Primus (EVA-02) Transformer encoder, pretrained via masked autoencoding on 91K NLST scans, processes the whole lung. A CLS token captures global context, a max-pooled token summarizes encoder outputs, and a learnable MHA query token attends to local features. All three are concatenated and fed into a Cumulative Hazard Layer for 1–6 year risk prediction. The optional AIAG loss aligns attention weights with expert annotations when available.
     </p>
   </div>
 </section>
@@ -388,9 +388,11 @@ footer {
     <tbody>
       <tr class="split-header"><td colspan="9">Sybil Test Split</td></tr>
       <tr><td class="model-name">Sybil</td><td>SM-ST</td><td>0.927</td><td>0.844</td><td>0.792</td><td>0.769</td><td>0.755</td><td>0.750</td><td>0.749</td></tr>
+      <tr><td class="model-name">Sybil 1.5</td><td>SM-ST</td><td>0.944</td><td>0.883</td><td>0.831</td><td>0.803</td><td>0.779</td><td>0.774</td><td>0.772</td></tr>
       <tr><td class="model-name">M3FM</td><td>MM-MT</td><td>0.892</td><td>0.845</td><td>0.803</td><td>0.782</td><td>0.770</td><td>0.769</td><td>0.762</td></tr>
-      <tr class="ours"><td class="model-name">LungEvaty (w/ AIAG)</td><td>SM-ST</td><td class="best">0.928</td><td class="best">0.893</td><td class="best">0.848</td><td>0.819</td><td>0.808</td><td>0.805</td><td>0.800</td></tr>
-      <tr class="ours"><td class="model-name">LungEvaty (no annot.)</td><td>SM-ST</td><td>0.923</td><td>0.887</td><td>0.844</td><td class="best">0.820</td><td class="best">0.809</td><td class="best">0.809</td><td class="best">0.802</td></tr>
+      <tr class="ours"><td class="model-name">LungEvaty (w/ AIAG)</td><td>SM-ST</td><td>0.928</td><td>0.893</td><td>0.848</td><td>0.819</td><td>0.808</td><td>0.805</td><td>0.800</td></tr>
+      <tr class="ours"><td class="model-name">LungEvaty (no annot.)</td><td>SM-ST</td><td>0.923</td><td>0.887</td><td>0.844</td><td>0.820</td><td>0.809</td><td class="best">0.809</td><td>0.802</td></tr>
+      <tr class="ours"><td class="model-name">LungEvaty* (w/ AIAG)</td><td>SM-ST</td><td class="best">0.950</td><td class="best">0.905</td><td class="best">0.859</td><td class="best">0.825</td><td class="best">0.811</td><td>0.806</td><td class="best">0.803</td></tr>
 
       <tr class="split-header"><td colspan="9">M3FM Test Split</td></tr>
       <tr><td class="model-name">Sybil</td><td>SM-ST</td><td>0.943</td><td>0.880</td><td>0.847</td><td>0.850</td><td>0.849</td><td>0.847</td><td>0.844</td></tr>
@@ -410,12 +412,18 @@ footer {
     </thead>
     <tbody>
       <tr><td class="model-name">Sybil</td><td>0.357</td><td>0.285</td><td>0.251</td><td>0.235</td><td>0.244</td><td>0.292</td></tr>
+      <tr><td class="model-name">Sybil 1.5</td><td>0.374</td><td>0.325</td><td>0.292</td><td>0.272</td><td>0.270</td><td>0.317</td></tr>
       <tr><td class="model-name">M3FM</td><td>0.212</td><td>0.179</td><td>0.162</td><td>0.151</td><td>0.160</td><td>0.220</td></tr>
-      <tr class="ours"><td class="model-name">LungEvaty</td><td class="best">0.444</td><td class="best">0.364</td><td class="best">0.323</td><td class="best">0.297</td><td class="best">0.299</td><td class="best">0.361</td></tr>
+      <tr class="ours"><td class="model-name">LungEvaty</td><td>0.444</td><td class="best">0.364</td><td class="best">0.323</td><td class="best">0.297</td><td class="best">0.299</td><td class="best">0.361</td></tr>
+      <tr class="ours"><td class="model-name">LungEvaty*</td><td class="best">0.451</td><td>0.358</td><td>0.314</td><td>0.287</td><td>0.290</td><td>0.347</td></tr>
     </tbody>
   </table>
   </div>
   </div>
+
+  <p style="font-size:0.82rem; color:var(--fg-muted); margin-top:20px; line-height:1.6;">
+    <strong>*</strong> LungEvaty* is not reported in the paper. The only architectural change is the addition of a max-pooled token, concatenated alongside the CLS token and attention-pooled token before the Cumulative Hazard Layer.
+  </p>
 </section>
 
 <section>
